@@ -534,19 +534,23 @@
       .video-scroll-overlay {
         background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 50%, transparent 100%);
         justify-content: flex-end;
-        padding-bottom: 72px;
+        padding-bottom: 110px;
+        padding-left: 20px;
+        padding-right: 20px;
       }
       .video-scroll-text {
         opacity: 1;
         transform: none;
         transition: none;
+        width: 100%;
       }
       .video-scroll-text h2 {
-        font-size: 2.1rem;
-        margin-bottom: 10px;
+        font-size: 2rem;
+        margin-bottom: 8px;
       }
       .video-scroll-text p {
-        font-size: 0.88rem;
+        font-size: 0.85rem;
+        max-width: 100%;
       }
       .video-progress-bar {
         display: none;
@@ -604,7 +608,7 @@
 <!-- VIDEO SCROLL -->
 <div class="video-scroll-section" id="video-scroll">
   <div class="video-scroll-sticky">
-    <video id="scroll-video" muted playsinline preload="auto" src="assets/hero.mp4"></video>
+    <video id="scroll-video" muted playsinline autoplay loop preload="auto" src="assets/hero.mp4"></video>
     <div class="video-scroll-overlay">
       <div class="video-scroll-text" id="video-scroll-text">
         <h2>El arte en tus <em>uñas</em><br>comienza aquí</h2>
@@ -981,13 +985,11 @@
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
   if (isMobile) {
-    // Móvil: vídeo en loop automático, texto siempre visible
-    scrollVideo.setAttribute('autoplay', '');
-    scrollVideo.setAttribute('loop', '');
-    scrollVideo.muted = true;
-    scrollVideo.play().catch(() => {});
+    // Móvil: autoplay/loop ya están en el HTML, solo asegurar texto visible
     scrollText.classList.add('visible');
   } else {
+    // Escritorio: cancelar autoplay/loop y tomar control con scroll
+    scrollVideo.loop = false;
     // Escritorio: scroll fotograma a fotograma con RAF + lerp
     let targetProgress = 0;
     let renderedProgress = 0;
