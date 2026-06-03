@@ -455,7 +455,7 @@
     #scroll-video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
     }
     .video-scroll-overlay {
@@ -527,7 +527,7 @@
         background: #000;
       }
       #scroll-video {
-        object-fit: contain;
+        object-fit: cover;
         width: 100%;
         height: 100%;
       }
@@ -608,7 +608,7 @@
 <!-- VIDEO SCROLL -->
 <div class="video-scroll-section" id="video-scroll">
   <div class="video-scroll-sticky">
-    <video id="scroll-video" muted playsinline autoplay loop preload="auto" src="assets/hero.mp4"></video>
+    <video id="scroll-video" muted playsinline autoplay loop preload="auto"></video>
     <div class="video-scroll-overlay">
       <div class="video-scroll-text" id="video-scroll-text">
         <h2>El arte en tus <em>uñas</em><br>comienza aquí</h2>
@@ -983,6 +983,10 @@
   const scrollText = document.getElementById('video-scroll-text');
   const progressFill = document.getElementById('video-progress-fill');
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  // Cargar el vídeo correcto según dispositivo
+  scrollVideo.src = isMobile ? 'assets/hero-mobile.mp4' : 'assets/hero-desktop.mp4';
+  scrollVideo.load();
 
   if (isMobile) {
     // Móvil: autoplay/loop ya están en el HTML, solo asegurar texto visible
