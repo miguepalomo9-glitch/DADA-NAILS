@@ -517,6 +517,36 @@
       transition: width 0.05s linear;
     }
 
+    /* ── VIDEO SCROLL — MÓVIL ───────────────── */
+    @media (max-width: 768px) {
+      .video-scroll-section {
+        height: 100vh;
+      }
+      .video-scroll-sticky {
+        height: 100vh;
+      }
+      .video-scroll-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+        justify-content: flex-end;
+        padding-bottom: 72px;
+      }
+      .video-scroll-text {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .video-scroll-text h2 {
+        font-size: 2.1rem;
+        margin-bottom: 10px;
+      }
+      .video-scroll-text p {
+        font-size: 0.88rem;
+      }
+      .video-progress-bar {
+        display: none;
+      }
+    }
+
     /* ── RESPONSIVE ─────────────────────────── */
     @media (max-width:900px) {
       nav { padding:0 24px; }
@@ -937,53 +967,61 @@
     });
   });
 
-  // Video scroll (Apple-style) — RAF + lerp para máxima fluidez
+  // Video scroll — móvil: autoplay loop / escritorio: scroll Apple-style
   const scrollVideo = document.getElementById('scroll-video');
   const scrollSection = document.getElementById('video-scroll');
   const scrollText = document.getElementById('video-scroll-text');
   const progressFill = document.getElementById('video-progress-fill');
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-  let targetProgress = 0;
-  let renderedProgress = 0;
-  let rafId = null;
+  if (isMobile) {
+    // Móvil: vídeo en loop automático, texto siempre visible
+    scrollVideo.setAttribute('autoplay', '');
+    scrollVideo.setAttribute('loop', '');
+    scrollVideo.muted = true;
+    scrollVideo.play().catch(() => {});
+    scrollText.classList.add('visible');
+  } else {
+    // Escritorio: scroll fotograma a fotograma con RAF + lerp
+    let targetProgress = 0;
+    let renderedProgress = 0;
+    let rafId = null;
 
-  scrollVideo.addEventListener('loadedmetadata', () => {
-    scrollVideo.pause();
-    scrollVideo.currentTime = 0;
-  });
+    scrollVideo.addEventListener('loadedmetadata', () => {
+      scrollVideo.pause();
+      scrollVideo.currentTime = 0;
+    });
 
-  function calcProgress() {
-    const rect = scrollSection.getBoundingClientRect();
-    const sectionHeight = scrollSection.offsetHeight - window.innerHeight;
-    const scrolled = -rect.top;
-    return Math.min(Math.max(scrolled / sectionHeight, 0), 1);
-  }
-
-  window.addEventListener('scroll', () => {
-    targetProgress = calcProgress();
-    if (!rafId) rafId = requestAnimationFrame(rafLoop);
-  }, { passive: true });
-
-  function rafLoop() {
-    rafId = null;
-    const diff = targetProgress - renderedProgress;
-
-    if (Math.abs(diff) < 0.0001) {
-      renderedProgress = targetProgress;
-    } else {
-      renderedProgress += diff * 0.14;
-      rafId = requestAnimationFrame(rafLoop);
+    function calcProgress() {
+      const rect = scrollSection.getBoundingClientRect();
+      const sectionHeight = scrollSection.offsetHeight - window.innerHeight;
+      const scrolled = -rect.top;
+      return Math.min(Math.max(scrolled / sectionHeight, 0), 1);
     }
 
-    if (scrollVideo.readyState >= 2) {
-      scrollVideo.currentTime = renderedProgress * scrollVideo.duration;
-    }
-    progressFill.style.width = (renderedProgress * 100) + '%';
+    window.addEventListener('scroll', () => {
+      targetProgress = calcProgress();
+      if (!rafId) rafId = requestAnimationFrame(rafLoop);
+    }, { passive: true });
 
-    if (renderedProgress > 0.12 && renderedProgress < 0.88) {
-      scrollText.classList.add('visible');
-    } else {
-      scrollText.classList.remove('visible');
+    function rafLoop() {
+      rafId = null;
+      const diff = targetProgress - renderedProgress;
+      if (Math.abs(diff) < 0.0001) {
+        renderedProgress = targetProgress;
+      } else {
+        renderedProgress += diff * 0.14;
+        rafId = requestAnimationFrame(rafLoop);
+      }
+      if (scrollVideo.readyState >= 2) {
+        scrollVideo.currentTime = renderedProgress * scrollVideo.duration;
+      }
+      progressFill.style.width = (renderedProgress * 100) + '%';
+      if (renderedProgress > 0.12 && renderedProgress < 0.88) {
+        scrollText.classList.add('visible');
+      } else {
+        scrollText.classList.remove('visible');
+      }
     }
   }
 </script>
